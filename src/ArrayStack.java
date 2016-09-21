@@ -1,8 +1,8 @@
-import java.util.Arrays;
-
 /**
  * Created by ryan on 9/18/16.
  */
+import java.util.Arrays;
+
 public class ArrayStack<E> implements Stack<E> {
     private E[] data;
     private int top;

@@ -2,37 +2,23 @@
  * Created by ryan on 9/18/16.
  */
 public class Coordinate {
-    private int col;
     private int row;
+    private int col;
 
-    public Coordinate() {
-        col = 0;
-        row = 0;
-    }
-
-    public Coordinate(int x, int y) {
-        col = x;
-        row = y;
-    }
-
-    public int getCol() {
-        return col;
-    }
-
-    public void setCol(int col) {
+    public Coordinate(int row, int col) {
+        this.row = row;
         this.col = col;
+    }
+
+    public boolean equals(Coordinate rhs) {
+        return (row == rhs.getRow() && col == rhs.getCol());
     }
 
     public int getRow() {
         return row;
     }
 
-    public void setRow(int row) {
-        this.row = row;
-    }
-
-    @Override
-    public String toString() {
-        return "Col: " + col + " " + "Row: " + row;
+    public int getCol() {
+        return col;
     }
 }
