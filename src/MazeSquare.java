@@ -24,38 +24,46 @@ public class MazeSquare {
     }
 
     public void toggleWall(Direction dir) {
-        throw new RuntimeException("Unimplmemented.");
+        if (this.wall[dir.value()] == false) {
+            this.wall[dir.value()] = true;
+        } else {
+            this.wall[dir.value()] = false;
+        }
     }
 
     public boolean getWall(Direction dir) {
-        throw new RuntimeException("Unimplemented.");
+        return this.wall[dir.value()];
     }
 
     public boolean isVisited() {
-        throw new RuntimeException("Unimplmemented.");
+        return this.visited;
     }
 
     public void visit() {
-        throw new RuntimeException("Unimplmemented.");
+        this.visited = true;
     }
 
     public boolean isAbandoned() {
-        throw new RuntimeException("Unimplmemented.");
+        return this.abandoned;
     }
 
     public void abandon() {
-        throw new RuntimeException("Unimplmemented.");
+        this.abandoned = true;
     }
 
     public void clear() {
-        throw new RuntimeException("Unimplmemented.");
+        this.visited = false;
+        this.abandoned = false;
     }
 
     public Coordinate getPosition() {
-        throw new RuntimeException("Unimplmemented.");
+        return myPosition;
     }
 
     public boolean equals(MazeSquare other) {
-        throw new RuntimeException("Unimplmemented.");
+        if (this.myPosition == other.myPosition) {
+            return true;
+        }
+        return false;
     }
 }

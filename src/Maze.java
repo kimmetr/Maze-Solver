@@ -1,19 +1,30 @@
 /**
  * Created by ryan on 9/21/16.
  */
+
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Random;
 
 public class Maze {
-    private MazeSquare[][] square;
+    private MazeSquare[][] maze;
     private Coordinate startPos;
     private Coordinate finishPos;
     private int numRows;
     private int numCols;
+    private boolean[] fullWallSet = {true, true, true, true};
 
     public Maze(int numRows, int numCols) {
-        throw new RuntimeException("Unimplemented.");
+        this.numRows = numRows;
+        this.numCols = numCols;
+        maze = new MazeSquare[numRows][numCols];
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                maze[i][j] = new MazeSquare(new Coordinate(i, j), fullWallSet);
+            }
+        }
+        this.genMaze();
+        this.clear();
     }
 
     public static void main(String[] args) {
@@ -28,53 +39,96 @@ public class Maze {
     }
 
     public MazeSquare squareAt(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        return maze[p.getRow()][p.getCol()];
     }
 
+
     public void visitPos(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        squareAt(p).visit();
     }
 
     public void abandonPos(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        squareAt(p).abandon();
     }
 
     public Coordinate getStart() {
-        throw new RuntimeException("Unimplemented.");
+        return startPos;
     }
 
     public Coordinate getFinish() {
-        throw new RuntimeException("Unimplemented.");
+        return finishPos;
     }
 
     public Coordinate northOf(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        return new Coordinate(p.getRow() + -1, p.getCol());
     }
 
     public Coordinate eastOf(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        return new Coordinate(p.getRow(), p.getCol() + 1);
     }
 
     public Coordinate southOf(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        return new Coordinate(p.getRow() + 1, p.getCol());
     }
 
     public Coordinate westOf(Coordinate p) {
-        throw new RuntimeException("Unimplemented.");
+        return new Coordinate(p.getRow(), p.getCol() - 1);
     }
 
     public boolean movePossible(Coordinate from, Coordinate to) {
-        throw new RuntimeException("Unimplemented.");
+        if (from.getCol() >= numCols || from.getCol() < 0 || from.getRow() >= numRows || from.getRow() < 0 || to.getCol() >= numCols || to.getCol() < 0 || to.getRow() >= numRows || to.getRow() < 0) {
+            return false; //returns false if either coordinate is not on maze
+        }
+        if (squareAt(to).isVisited() || squareAt(to).isAbandoned()) {
+            return false; //return false if the to coordinate has already been visited or abandoned
+        }
+        if (squareAt(from).getWall(directionOfWall(from, to)) == true || squareAt(to).getWall(directionOfWall(to, from)) == true) {
+            return false; //return false if there is a wall in between the two coordinates
+        }
+        return true; //if none of the negative conditions have been met the move is possible, return true
+    }
+
+    public Direction directionOfWall(Coordinate from, Coordinate to) {
+        Direction adjacentWall;
+        if (westOf(from).equals(to)) { //if from is to the right of to
+            adjacentWall = Direction.WEST;
+        } else if (eastOf(from).equals(to)) { //if from is to the left of to
+            adjacentWall = Direction.EAST;
+        } else if (northOf(from).equals(to)) { //if from is below to
+            adjacentWall = Direction.NORTH;
+        } else { //if from is above to
+            adjacentWall = Direction.SOUTH;
+        }
+        return adjacentWall;
     }
 
     private void genMaze() {
-        throw new RuntimeException("Unimplemented.");
+        Random rnd = new Random();
+        startPos = new Coordinate(rnd.nextInt(numRows), 0); //generate start position
+        finishPos = new Coordinate(rnd.nextInt(numRows), numCols - 1); //generate finish position
+        squareAt(startPos).toggleWall(Direction.WEST); //removes start wall
+        squareAt(finishPos).toggleWall(Direction.EAST); //removes finish wall
+        Stack<Coordinate> current = new ArrayStack<>();
+        current.push(null);
+        current.push(startPos);
+        while (current.top() != null) {
+            ArrayList<Coordinate> unvisitedNeighbors = unvisitedNeighbors(current.top()); //initiates array list of unvisited neighbors
+            if (unvisitedNeighbors.isEmpty()) {
+                current.pop(); //pops off the top of the stack if the there is no unvisited neighbors
+            } else {
+                Coordinate next = unvisitedNeighbors.get(rnd.nextInt(unvisitedNeighbors.size())); //picks a random unvisited neighbor
+                squareAt(current.top()).toggleWall(directionOfWall(current.top(), next)); //removes wall between current and next
+                squareAt(next).toggleWall(directionOfWall(next, current.top())); //removes wall between next and current
+                visitPos(next);
+                current.push(next);
+            }
+        }
     }
 
     private void clear() {
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
-                square[i][j].clear();
+                maze[i][j].clear();
             }
         }
     }
@@ -87,13 +141,13 @@ public class Maze {
         int r = p.getRow();
         int c = p.getCol();
 
-        if (r > 0 && !square[r - 1][c].isVisited())
+        if (r > 0 && !maze[r - 1][c].isVisited())
             list.add(new Coordinate(r - 1, c));
-        if (r < numRows - 1 && !square[r + 1][c].isVisited())
+        if (r < numRows - 1 && !maze[r + 1][c].isVisited())
             list.add(new Coordinate(r + 1, c));
-        if (c > 0 && !square[r][c - 1].isVisited())
+        if (c > 0 && !maze[r][c - 1].isVisited())
             list.add(new Coordinate(r, c - 1));
-        if (c < numCols - 1 && !square[r][c + 1].isVisited())
+        if (c < numCols - 1 && !maze[r][c + 1].isVisited())
             list.add(new Coordinate(r, c + 1));
 
         return list;
@@ -122,17 +176,17 @@ public class Maze {
             }
 
             for (int j = 0; j < numCols; j++) {
-                if (square[i][j].getWall(Direction.SOUTH)) {
+                if (maze[i][j].getWall(Direction.SOUTH)) {
                     buf.append("_");
                 } else {
                     buf.append(" ");
                 }
 
-                if (square[i][j].getWall(Direction.EAST)) {
+                if (maze[i][j].getWall(Direction.EAST)) {
                     buf.append("|");
                 } else {
                     if (j + 1 < numCols) {
-                        if (square[i][j + 1].getWall(Direction.SOUTH)) {
+                        if (maze[i][j + 1].getWall(Direction.SOUTH)) {
                             buf.append("_");
                         } else {
                             buf.append(".");
